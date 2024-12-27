@@ -1,6 +1,7 @@
 import express from "express";
 import { Request, Response } from "express";
 import { Category, Product } from "../models/product";
+import { InvalidProductError, ParseProductError } from "../errors/error";
 const productController = () => {
   const router = express.Router();
 
@@ -8,7 +9,7 @@ const productController = () => {
     query: {
       sort: string;
       order: "asc" | "desc";
-      categories: string;
+      categories?: string;
       offset: string;
       limit: string;
       price_min: string;
@@ -47,7 +48,7 @@ const productController = () => {
     minPrice: number
   ): Product[] {
     const newProducts: Product[] = products.filter(
-      (product) => product.price >= minPrice && product.price <= maxPrice - 100
+      (product) => product.price >= minPrice && product.price <= maxPrice
     );
     return newProducts;
   }
@@ -99,7 +100,7 @@ const productController = () => {
     start: number,
     end: number
   ): Product[] {
-    return products.slice(start, end);
+    return products.slice(start, end + start);
   }
 
   const filterProduct = async (req: FilterProductsRequest, res: Response) => {
@@ -121,7 +122,10 @@ const productController = () => {
       const limits = limitProducts(sorted, parsedReq.offset, parsedReq.limit);
       res.status(200).json(limits);
     } catch (error) {
-      if (error instanceof RangeError) {
+      if (
+        error instanceof InvalidProductError ||
+        error instanceof ParseProductError
+      ) {
         res.status(400).json({ msg: error.message, statusCode: 400 });
       } else {
         res.status(500).json({ msg: "Internal Server Error", statusCode: 500 });
@@ -138,13 +142,16 @@ const productController = () => {
       req.star_max < 0 ||
       req.star_min < 0
     ) {
-      throw RangeError;
+      throw new InvalidProductError("Product is not a valid product.");
     }
   }
 
   function parseRequest(
     req: FilterProductsRequest
   ): ParsedFilterProductsRequest {
+    if (!req.query.categories) {
+      req.query.categories = "";
+    }
     try {
       const parsedReq = {
         sort: req.query.sort,
@@ -157,10 +164,13 @@ const productController = () => {
         star_min: parseInt(req.query.star_min),
         star_max: parseInt(req.query.star_max),
       };
+      if (!req.query.categories) {
+        parsedReq.categories = [];
+      }
       return parsedReq;
-    } catch {
+    } catch (e) {
       // implement custom error
-      throw new Error();
+      throw new ParseProductError("Cannot parse product.");
     }
   }
 
