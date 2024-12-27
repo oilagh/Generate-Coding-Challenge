@@ -139,4 +139,106 @@ describe("Express App", () => {
       },
     ]);
   });
+
+  it("test ordering by price", async () => {
+    const response = await request(app).get(
+      "/api/v1/products/?sort=price&order=asc&offset=0&limit=6&price_min=0&price_max=10000&star_min=0&star_max=10000"
+    );
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual([
+      {
+        categories: ["grocery"],
+        id: "YZA13579",
+        name: "Oreo Original Cookies",
+        price: 400,
+        stars: 471,
+      },
+      {
+        categories: ["home goods"],
+        id: "TOO35791",
+        name: "Philips Sonicare 4100 Electric Toothbrush",
+        price: 4900,
+        stars: 271,
+      },
+      {
+        categories: ["electronics", "home goods"],
+        id: "STR35791",
+        name: "Roku Streaming Stick 4K",
+        price: 5000,
+        stars: 439,
+      },
+      {
+        categories: ["home goods"],
+        id: "GRI35781",
+        name: "Cuisinart 5-in-1 Griddler",
+        price: 7000,
+        stars: 403,
+      },
+      {
+        categories: ["home goods"],
+        id: "OXO35791",
+        name: "OXO Brew Conical Burr Coffee Grinder",
+        price: 8900,
+        stars: 276,
+      },
+      {
+        categories: ["electronics", "office supplies"],
+        id: "MKB13579",
+        name: "Apple Magic Keyboard",
+        price: 9900,
+        stars: 285,
+      },
+    ]);
+  });
+
+  it("test ordering by stars", async () => {
+    const response = await request(app).get(
+      "/api/v1/products/?sort=stars&order=asc&offset=0&limit=6&price_min=0&price_max=10000&star_min=0&star_max=10000"
+    );
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual([
+      {
+        categories: ["home goods"],
+        id: "TOO35791",
+        name: "Philips Sonicare 4100 Electric Toothbrush",
+        price: 4900,
+        stars: 271,
+      },
+      {
+        categories: ["home goods"],
+        id: "OXO35791",
+        name: "OXO Brew Conical Burr Coffee Grinder",
+        price: 8900,
+        stars: 276,
+      },
+      {
+        categories: ["electronics", "office supplies"],
+        id: "MKB13579",
+        name: "Apple Magic Keyboard",
+        price: 9900,
+        stars: 285,
+      },
+      {
+        categories: ["home goods"],
+        id: "GRI35781",
+        name: "Cuisinart 5-in-1 Griddler",
+        price: 7000,
+        stars: 403,
+      },
+      {
+        categories: ["electronics", "home goods"],
+        id: "STR35791",
+        name: "Roku Streaming Stick 4K",
+        price: 5000,
+        stars: 439,
+      },
+      {
+        categories: ["grocery"],
+        id: "YZA13579",
+        name: "Oreo Original Cookies",
+        price: 400,
+        stars: 471,
+      },
+    ]);
+  });
 });
